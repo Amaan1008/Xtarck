@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {},
+  "files": [
+    "../ts/shared/types.ts",
+    "../ts/shared/dom.ts",
+    "../ts/shared/globals.ts",
+    "../ts/pages/xtrack.ts"
+  ]
+}

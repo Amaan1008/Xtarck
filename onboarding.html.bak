@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>XTrack — Tell Us About You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-lt:#E8C96A;--gold-glow:rgba(201,168,76,0.35);
+  --teal:#1A7A6E;--teal-lt:#25B09E;--teal-glow:rgba(37,176,158,0.3);
+  --navy:#0B1826;--navy2:#0F2236;
+  --text:#E8EDF2;--muted:#7A9AB5;--muted2:#4A6A85;
+  --card:rgba(15,34,54,0.82);--sel:rgba(201,168,76,0.13);
+  --r:18px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);overflow:hidden}
+
+/* ── Background ── */
+.bg{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 15% 20%,rgba(26,122,110,0.18) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 80% at 85% 80%,rgba(201,168,76,0.12) 0%,transparent 55%),
+             radial-gradient(ellipse 50% 50% at 50% 50%,rgba(11,24,38,0.9) 0%,#070E18 100%);
+  animation:bgShift 14s ease-in-out infinite alternate}
+@keyframes bgShift{100%{filter:hue-rotate(6deg) brightness(1.04)}}
+#bgc{position:fixed;inset:0;z-index:0;pointer-events:none}
+.ptcl{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.p{position:absolute;border-radius:50%;animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:.5}90%{opacity:.15}100%{transform:translateY(-110vh) scale(.4);opacity:0}}
+
+/* ── Header ── */
+.logo{position:fixed;top:26px;left:34px;z-index:20;display:flex;align-items:center;gap:10px;opacity:0;animation:fadeDown .7s .15s forwards}
+.logo-i{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--teal-lt));display:flex;align-items:center;justify-content:center;font-size:17px}
+.logo-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;letter-spacing:1px;background:linear-gradient(90deg,var(--gold-lt),var(--teal-lt));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.prog{position:fixed;top:0;left:0;right:0;height:3px;z-index:30;background:rgba(255,255,255,.06)}
+.progb{height:100%;background:linear-gradient(90deg,var(--teal-lt),var(--gold));border-radius:0 3px 3px 0;transition:width .65s cubic-bezier(.4,0,.2,1);box-shadow:0 0 14px var(--gold-glow)}
+.dots{position:fixed;top:28px;right:34px;z-index:20;display:flex;gap:8px;opacity:0;animation:fadeDown .7s .3s forwards}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .35s}
+.dot.on{background:var(--gold);transform:scale(1.35);box-shadow:0 0 7px var(--gold)}
+.dot.done{background:var(--teal-lt)}
+
+/* ── Stage (question screens) ── */
+.stage{position:relative;z-index:1;height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.scr{width:100%;max-width:800px;opacity:0;pointer-events:none;position:absolute;transform:translateX(55px);transition:opacity .45s,transform .45s cubic-bezier(.4,0,.2,1)}
+.scr.on{opacity:1;pointer-events:all;transform:translateX(0)}
+.scr.out{opacity:0;transform:translateX(-55px)}
+
+.qlbl{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;opacity:0}
+.scr.on .qlbl{animation:fadeUp .45s .08s forwards}
+.qtitle{font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:700;line-height:1.25;margin-bottom:8px;opacity:0}
+.scr.on .qtitle{animation:fadeUp .45s .18s forwards}
+.qsub{font-size:14px;color:var(--muted);margin-bottom:28px;opacity:0}
+.scr.on .qsub{animation:fadeUp .45s .28s forwards}
+
+.choices{display:grid;gap:11px;opacity:0}
+.scr.on .choices{animation:fadeUp .45s .38s forwards}
+.c2{grid-template-columns:repeat(2,1fr)}
+.c3{grid-template-columns:repeat(3,1fr)}
+.ca{grid-template-columns:repeat(auto-fill,minmax(195px,1fr))}
+
+.ch{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:var(--r);padding:17px 18px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:13px;backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.ch::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.07),transparent);opacity:0;transition:opacity .22s}
+.ch:hover{border-color:rgba(201,168,76,.38);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.ch:hover::before{opacity:1}
+.ch.sel{border-color:var(--gold);background:var(--sel);box-shadow:0 0 0 1px rgba(201,168,76,.25),0 6px 24px rgba(201,168,76,.12)}
+.ch.sel::before{opacity:1}
+.ch-em{font-size:24px;flex-shrink:0}
+.ch-b{flex:1}
+.ch-t{font-size:14.5px;font-weight:500;line-height:1.3}
+.ch-d{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.ch-ck{width:21px;height:21px;border-radius:50%;border:1.5px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .22s;font-size:11px}
+.ch.sel .ch-ck{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.mhint{font-size:12px;color:var(--muted);margin-bottom:16px;margin-top:-18px;display:flex;align-items:center;gap:6px;opacity:0}
+.scr.on .mhint{animation:fadeUp .45s .33s forwards}
+.mhint span{background:rgba(255,255,255,.07);border-radius:20px;padding:2px 10px;font-size:11px}
+
+.ctar{margin-top:26px;display:flex;justify-content:space-between;align-items:center;opacity:0}
+.scr.on .ctar{animation:fadeUp .45s .5s forwards}
+.btn-n{padding:13px 34px;border-radius:50px;background:linear-gradient(135deg,var(--gold),#A87C30);color:var(--navy);font-size:14.5px;font-weight:700;border:none;cursor:pointer;letter-spacing:.4px;transition:all .22s;box-shadow:0 4px 18px var(--gold-glow);display:flex;align-items:center;gap:7px}
+.btn-n:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,.45)}
+.btn-n:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-n .arr{font-size:17px;transition:transform .2s}
+.btn-n:hover .arr{transform:translateX(4px)}
+.btn-sk{font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer;padding:7px 14px;border-radius:8px;transition:color .2s}
+.btn-sk:hover{color:var(--text)}
+
+/* ══════════════════════════════════════════
+   DISCOVERY SCREEN
+══════════════════════════════════════════ */
+#disc{
+  position:fixed;inset:0;z-index:10;
+  overflow-y:auto;
+  padding:88px 28px 50px;
+  opacity:0;pointer-events:none;
+  transition:opacity .6s .1s;
+}
+#disc.on{opacity:1;pointer-events:all}
+
+/* Animated noise overlay for depth */
+#disc::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(37,176,158,0.08) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 60% at 20% 80%,rgba(201,168,76,0.07) 0%,transparent 55%),
+             #070E18;
+}
+
+.disc-head{text-align:center;margin-bottom:28px}
+.disc-eyebrow{font-size:11px;font-weight:600;letter-spacing:3.5px;text-transform:uppercase;color:var(--teal-lt);margin-bottom:10px;opacity:0}
+#disc.on .disc-eyebrow{animation:fadeUp .55s .15s forwards}
+.disc-title{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,46px);font-weight:900;line-height:1.2;background:linear-gradient(135deg,var(--text) 30%,var(--gold-lt));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;opacity:0}
+#disc.on .disc-title{animation:fadeUp .55s .28s forwards}
+.disc-count{font-size:14.5px;color:var(--muted);margin-bottom:16px;opacity:0}
+#disc.on .disc-count{animation:fadeUp .55s .4s forwards}
+
+/* Profile badge row */
+.prow{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:30px;opacity:0}
+#disc.on .prow{animation:fadeUp .55s .52s forwards}
+.pb{padding:6px 15px;border-radius:30px;font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:6px}
+.pb.style {background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.32);color:var(--gold-lt)}
+.pb.env   {background:rgba(37,176,158,.11);border:1px solid rgba(37,176,158,.28);color:var(--teal-lt)}
+.pb.comp  {background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.11);color:var(--text)}
+.pb.bud   {background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.18);color:#90C8FF}
+
+/* ── PLACE GRID ── */
+.pgrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:13px;
+  width:100%;
+  max-width:1150px;
+  margin:0 auto;
+  /* Variable row heights via grid-template-rows */
+}
+
+/* Featured first card spans 2×2 */
+.pgrid .pc:nth-child(1){ grid-column:span 2; min-height:310px }
+/* A couple of double-wide accent cards */
+.pgrid .pc:nth-child(5){ grid-column:span 2; min-height:175px }
+.pgrid .pc:nth-child(9){ grid-column:span 2; min-height:175px }
+/* Standard cards */
+.pgrid .pc{ min-height:175px }
+
+@media(max-width:950px){
+  .pgrid{grid-template-columns:repeat(3,1fr)}
+  .pgrid .pc:nth-child(1){grid-column:span 2;min-height:220px}
+  .pgrid .pc:nth-child(5),.pgrid .pc:nth-child(9){grid-column:span 1}
+}
+@media(max-width:640px){
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .pgrid .pc:nth-child(1){grid-column:span 2;min-height:180px}
+  #disc{padding:76px 14px 44px}
+}
+
+/* ── Place Card ── */
+.pc{
+  border-radius:15px;overflow:hidden;position:relative;cursor:pointer;
+  opacity:0;transform:translateY(26px) scale(.96);
+  transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s,opacity .001s;
+}
+.pc.vis{opacity:1;transform:translateY(0) scale(1)}
+.pc:hover{transform:translateY(-6px) scale(1.015)!important;
+          box-shadow:0 20px 50px rgba(0,0,0,.55),0 0 0 1.5px rgba(201,168,76,.22)}
+.pc-bg{position:absolute;inset:0;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.pc:hover .pc-bg{transform:scale(1.08)}
+.pc-ov{position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(3,10,20,.94) 0%,rgba(3,10,20,.45) 48%,rgba(3,10,20,.08) 100%)}
+.pc-content{position:absolute;inset:0;padding:14px;display:flex;flex-direction:column;justify-content:flex-end}
+.pc-badge-wrap{position:absolute;top:12px;right:12px}
+.pc-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.6px;text-transform:uppercase;backdrop-filter:blur(10px);white-space:nowrap;display:inline-block}
+.pc-em{font-size:clamp(18px,2.5vw,24px);margin-bottom:5px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.pc-name{font-family:'Playfair Display',serif;font-size:clamp(13px,1.6vw,17px);font-weight:700;line-height:1.2;text-shadow:0 1px 10px rgba(0,0,0,.7)}
+.pc-tags{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;line-height:1.3}
+
+/* ── Launch CTA ── */
+.disc-cta{text-align:center;margin-top:36px;opacity:0}
+#disc.on .disc-cta{animation:fadeUp .55s 1.3s forwards}
+.btn-launch{padding:15px 52px;border-radius:50px;background:linear-gradient(135deg,var(--teal-lt),var(--teal));color:#fff;font-size:15.5px;font-weight:700;border:none;cursor:pointer;letter-spacing:.4px;transition:all .3s;box-shadow:0 5px 28px var(--teal-glow);display:inline-flex;align-items:center;gap:8px}
+.btn-launch:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(37,176,158,.55)}
+.disc-note{font-size:12px;color:var(--muted2);margin-top:11px}
+
+/* ── Keyframes ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<canvas id="bgc"></canvas>
+<div class="ptcl" id="ptcl"></div>
+
+<div class="logo" style="gap:0"><img src="assets/logo.png" alt="Xtrack" style="height:30px;width:auto;display:block"></div>
+<div class="prog"><div class="progb" id="progb"></div></div>
+<div class="dots" id="dotrow">
+  <div class="dot on" data-i="0"></div>
+  <div class="dot" data-i="1"></div>
+  <div class="dot" data-i="2"></div>
+  <div class="dot" data-i="3"></div>
+</div>
+
+<!-- ── QUESTION SCREENS ── -->
+<div class="stage" id="stage">
+
+  <div class="scr on" id="scr-0">
+    <div class="qlbl">Step 1 of 4</div>
+    <h2 class="qtitle">What kind of traveler are you?</h2>
+    <p class="qsub">This single answer shapes every destination, hotel and activity we recommend.</p>
+    <div class="choices ca" data-q="style" data-multi="false">
+      <div class="ch" data-v="adventure"><div class="ch-em">🏔️</div><div class="ch-b"><div class="ch-t">Adventure & Thrills</div><div class="ch-d">Hikes, rapids & wild terrain</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="relaxation"><div class="ch-em">🧘</div><div class="ch-b"><div class="ch-t">Relaxation & Wellness</div><div class="ch-d">Recharge, unwind & breathe</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="culture"><div class="ch-em">🏛️</div><div class="ch-b"><div class="ch-t">Culture & History</div><div class="ch-d">Ruins, temples & local life</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="food"><div class="ch-em">🍜</div><div class="ch-b"><div class="ch-t">Food & Local Flavors</div><div class="ch-d">Eat where the locals eat</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="nightlife"><div class="ch-em">🎉</div><div class="ch-b"><div class="ch-t">Nightlife & Social</div><div class="ch-d">Meet people, make memories</div></div><div class="ch-ck">✓</div></div>
+    </div>
+    <div class="ctar">
+      <button class="btn-sk" onclick="skipAll()">Skip for now</button>
+      <button class="btn-n" id="btn0" disabled onclick="goNext(0)">Continue <span class="arr">→</span></button>
+    </div>
+  </div>
+
+  <div class="scr" id="scr-1">
+    <div class="qlbl">Step 2 of 4</div>
+    <h2 class="qtitle">Who are you traveling with?</h2>
+    <p class="qsub">A solo backpacker and a family with kids need completely different trips.</p>
+    <div class="choices c2" data-q="companion" data-multi="false">
+      <div class="ch" data-v="solo"><div class="ch-em">🧳</div><div class="ch-b"><div class="ch-t">Solo Traveler</div><div class="ch-d">My pace, my rules</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="couple"><div class="ch-em">💑</div><div class="ch-b"><div class="ch-t">As a Couple</div><div class="ch-d">Romantic & shared moments</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="family"><div class="ch-em">👨‍👩‍👧</div><div class="ch-b"><div class="ch-t">Family & Kids</div><div class="ch-d">Safe, fun & memorable</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="friends"><div class="ch-em">🧑‍🤝‍🧑</div><div class="ch-b"><div class="ch-t">With Friends</div><div class="ch-d">Group energy & laughs</div></div><div class="ch-ck">✓</div></div>
+    </div>
+    <div class="ctar">
+      <button class="btn-sk" onclick="goPrev(1)">← Back</button>
+      <button class="btn-n" id="btn1" disabled onclick="goNext(1)">Continue <span class="arr">→</span></button>
+    </div>
+  </div>
+
+  <div class="scr" id="scr-2">
+    <div class="qlbl">Step 3 of 4</div>
+    <h2 class="qtitle">What environments excite you most?</h2>
+    <p class="qsub">This directly filters your destination suggestions.</p>
+    <p class="mhint">🎯 <span>Pick up to 2</span></p>
+    <div class="choices c3" data-q="environment" data-multi="true" data-max="2">
+      <div class="ch" data-v="beach"><div class="ch-em">🏖️</div><div class="ch-b"><div class="ch-t">Beach & Coastal</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="mountains"><div class="ch-em">🌿</div><div class="ch-b"><div class="ch-t">Mountains & Nature</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="urban"><div class="ch-em">🏙️</div><div class="ch-b"><div class="ch-t">Cities & Urban</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="countryside"><div class="ch-em">🌾</div><div class="ch-b"><div class="ch-t">Countryside & Villages</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="heritage"><div class="ch-em">🕌</div><div class="ch-b"><div class="ch-t">Heritage & Temples</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="remote"><div class="ch-em">🏜️</div><div class="ch-b"><div class="ch-t">Remote & Wild</div></div><div class="ch-ck">✓</div></div>
+    </div>
+    <div class="ctar">
+      <button class="btn-sk" onclick="goPrev(2)">← Back</button>
+      <button class="btn-n" id="btn2" disabled onclick="goNext(2)">Continue <span class="arr">→</span></button>
+    </div>
+  </div>
+
+  <div class="scr" id="scr-3">
+    <div class="qlbl">Step 4 of 4 — Last one!</div>
+    <h2 class="qtitle">What's your travel budget style?</h2>
+    <p class="qsub">No judgment — we just want to match you to the right experiences.</p>
+    <div class="choices c2" data-q="budget" data-multi="false">
+      <div class="ch" data-v="budget"><div class="ch-em">🎒</div><div class="ch-b"><div class="ch-t">Budget-Conscious</div><div class="ch-d">Hostels, local eats, free spots</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="midrange"><div class="ch-em">⚖️</div><div class="ch-b"><div class="ch-t">Mid-Range</div><div class="ch-d">Comfortable but not extravagant</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="premium"><div class="ch-em">✨</div><div class="ch-b"><div class="ch-t">Premium</div><div class="ch-d">Quality matters, few compromises</div></div><div class="ch-ck">✓</div></div>
+      <div class="ch" data-v="varies"><div class="ch-em">🔄</div><div class="ch-b"><div class="ch-t">Varies by Trip</div><div class="ch-d">Depends on the vibe</div></div><div class="ch-ck">✓</div></div>
+    </div>
+    <div class="ctar">
+      <button class="btn-sk" onclick="goPrev(3)">← Back</button>
+      <button class="btn-n" id="btn3" disabled onclick="doSubmit()">Discover My Places <span class="arr">→</span></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     DISCOVERY SCREEN
+══════════════════════════════════════════ -->
+<div id="disc">
+  <div class="disc-head">
+    <div class="disc-eyebrow">Your Personalized Sri Lanka</div>
+    <h1 class="disc-title" id="disc-title">We found your perfect destinations.</h1>
+    <p class="disc-count" id="disc-count"></p>
+    <div class="prow" id="prow"></div>
+  </div>
+
+  <div class="pgrid" id="pgrid"></div>
+
+  <div class="disc-cta">
+    <button class="btn-launch" onclick="goLaunch()">Start Exploring Sri Lanka →</button>
+    <div class="disc-note">Your preferences are saved · You can update them anytime from your profile</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//   PLACE POOL  (rich metadata for smart matching)
+// ══════════════════════════════════════════════════
+const PLACES = [
+  {n:"Ella Rock",gr:"linear-gradient(135deg,#0d1f0d,#1e5c30)",em:"🏔️",
+   style:["adventure"],env:["mountains"],comp:["solo","couple","friends"],bud:["budget","midrange","varies"],
+   why:{adventure:"Epic Summit Hike",mountains:"360° Peak Views",solo:"Solo Summit",couple:"Romantic Climb",friends:"Group Hike Challenge"},
+   tags:["Challenging Hike","360° Views","Tea Country"]},
+
+  {n:"Sigiriya Rock Fortress",gr:"linear-gradient(135deg,#4a1f00,#c26024)",em:"🪨",
+   style:["adventure","culture"],env:["heritage","mountains"],comp:["solo","couple","family","friends"],bud:["midrange","premium","varies"],
+   why:{adventure:"Ancient Rock Fortress Climb",culture:"5th Century Wonder",heritage:"UNESCO Marvel",mountains:"Sky-High Summit",family:"Iconic Family Day"},
+   tags:["UNESCO","Ancient Palace","1,200 Steps"]},
+
+  {n:"Knuckles Mountain Range",gr:"linear-gradient(135deg,#0a2015,#1a6640)",em:"🌿",
+   style:["adventure"],env:["mountains","remote"],comp:["solo","friends"],bud:["budget","midrange","varies"],
+   why:{adventure:"Multi-Day Wilderness Trek",mountains:"Misty Untamed Peaks",remote:"Deep Wilderness",solo:"Off-Grid Expedition",friends:"Group Trek Adventure"},
+   tags:["Trekking","Cloud Forest","Endemic Wildlife"]},
+
+  {n:"Horton Plains & World's End",gr:"linear-gradient(135deg,#112233,#4a8cc0)",em:"🌁",
+   style:["adventure","relaxation"],env:["mountains","remote"],comp:["solo","couple","family","friends"],bud:["midrange","varies"],
+   why:{adventure:"World's End Cliff Drop",relaxation:"Serene High Plateau",mountains:"High-Altitude Loop",remote:"Isolated Cloud Forest",couple:"Sunrise Together",family:"Nature Walk Together"},
+   tags:["880m Cliff Drop","Cloud Forest","Sambar Deer"]},
+
+  {n:"Kitulgala White Water Rafting",gr:"linear-gradient(135deg,#0a1f40,#1a5a8a)",em:"🚣",
+   style:["adventure","nightlife"],env:["mountains","remote"],comp:["friends","couple"],bud:["midrange","premium","varies"],
+   why:{adventure:"Heart-Pumping Rapids",nightlife:"Adrenaline Group Buzz",friends:"Ultimate Group Activity",couple:"Thrill Shared Together"},
+   tags:["Grade 3–4 Rapids","Jungle River","Award-Winning"]},
+
+  {n:"Adam's Peak",gr:"linear-gradient(135deg,#1a0a2e,#8a4aaa)",em:"⛰️",
+   style:["adventure","culture"],env:["mountains","heritage"],comp:["solo","couple","friends","family"],bud:["budget","midrange","varies"],
+   why:{adventure:"Night Summit Trek",culture:"Sacred Buddhist Footprint",heritage:"Pilgrimage Destination",solo:"Spiritual Solo Journey",couple:"Sunrise at the Top",friends:"Night Hike Adventure"},
+   tags:["Sunrise Summit","Sacred Site","5,558 Steps"]},
+
+  {n:"Pidurangala Rock",gr:"linear-gradient(135deg,#1e2e10,#5a9a1e)",em:"🧗",
+   style:["adventure","culture"],env:["heritage","mountains"],comp:["solo","couple","friends"],bud:["budget","varies"],
+   why:{adventure:"Boulder Scramble",culture:"Ancient Reclining Buddha",heritage:"Hidden Rock Temple",solo:"Budget Adventure",couple:"Sunrise View of Sigiriya",friends:"Short Fun Climb"},
+   tags:["Sunrise Views","Budget Pick","Best View of Sigiriya"]},
+
+  {n:"Lipton's Seat",gr:"linear-gradient(135deg,#0a2010,#3a8a50)",em:"🍃",
+   style:["relaxation","culture"],env:["mountains","countryside"],comp:["couple","solo","family"],bud:["budget","midrange","varies"],
+   why:{relaxation:"Tea Estate Serenity",culture:"Colonial Tea Heritage",countryside:"Rolling Tea Hills",couple:"Most Romantic Viewpoint",family:"Scenic Tuk-Tuk Ride"},
+   tags:["Endless Tea Horizon","Heritage","Tamil Tea Pluckers"]},
+
+  {n:"Mirissa Beach",gr:"linear-gradient(135deg,#0a1f50,#2a70d0)",em:"🏖️",
+   style:["relaxation","food","nightlife"],env:["beach"],comp:["couple","friends","solo","family"],bud:["budget","midrange","varies"],
+   why:{relaxation:"Perfect Golden Beach",food:"Fresh Seafood & Coconuts",nightlife:"Beach Bar Scene",beach:"Sheltered Crescent Bay",couple:"Sunset Romance",friends:"Social Beach Spot",solo:"Laid-Back Escape"},
+   tags:["Whale Watching","Sunset Beach","Coconut Palms"]},
+
+  {n:"Unawatuna",gr:"linear-gradient(135deg,#0a2840,#1a6888)",em:"🌊",
+   style:["relaxation","nightlife","food"],env:["beach"],comp:["friends","couple","solo"],bud:["budget","midrange","varies"],
+   why:{relaxation:"Calm Protected Cove",nightlife:"Beach Bar Strip",food:"Beachside Restaurant Scene",beach:"Natural Swimming Bay",friends:"Social Beach Town",couple:"Romantic Evenings"},
+   tags:["Snorkelling","Beach Bars","Galle Day Trip"]},
+
+  {n:"Arugam Bay",gr:"linear-gradient(135deg,#0a2010,#1a7060)",em:"🏄",
+   style:["adventure","relaxation","nightlife"],env:["beach","remote"],comp:["solo","friends","couple"],bud:["budget","midrange","varies"],
+   why:{adventure:"World-Class Surfing",relaxation:"Laid-Back Surf Town",nightlife:"Surf Town Party Nights",beach:"Epic Right-Hand Breaks",solo:"Backpacker Paradise",friends:"Surf & Socialize"},
+   tags:["World-Class Surf","Bohemian Vibes","East Coast Sunsets"]},
+
+  {n:"Trincomalee",gr:"linear-gradient(135deg,#0a1a3a,#1a50a0)",em:"🐬",
+   style:["adventure","relaxation"],env:["beach","heritage"],comp:["couple","family","solo","friends"],bud:["midrange","premium","varies"],
+   why:{adventure:"Scuba Diving & Snorkelling",relaxation:"Crystal Clear Waters",beach:"Pristine Untouched Beaches",heritage:"Dutch Fort Ruins",couple:"Romantic Harbour Town",family:"Safe Calm Swimming"},
+   tags:["Diving","Dolphins","Colonial Fort"]},
+
+  {n:"Bentota",gr:"linear-gradient(135deg,#0a2030,#1a6070)",em:"🌴",
+   style:["relaxation"],env:["beach","countryside"],comp:["couple","family"],bud:["midrange","premium","varies"],
+   why:{relaxation:"Luxury Beach Escape",beach:"Blue Lagoon & Calm Sea",couple:"Honeymoon Favourite",family:"Safe Family Beach Resort"},
+   tags:["Water Sports","Luxury Resorts","Blue Lagoon"]},
+
+  {n:"Pasikuda Beach",gr:"linear-gradient(135deg,#051520,#0a4060)",em:"🏊",
+   style:["relaxation"],env:["beach","remote"],comp:["couple","family","solo"],bud:["midrange","premium"],
+   why:{relaxation:"Crystal Shallow Lagoon",beach:"Sri Lanka's Shallowest Bay",family:"Safest Swimming in Sri Lanka",couple:"Secluded Paradise",solo:"Peaceful Escape"},
+   tags:["Shallow Turquoise Water","Pristine","East Coast Gem"]},
+
+  {n:"Galle Fort",gr:"linear-gradient(135deg,#0a1830,#1a408a)",em:"🏯",
+   style:["culture","food","relaxation"],env:["heritage","urban"],comp:["couple","solo","friends","family"],bud:["midrange","premium","varies"],
+   why:{culture:"400 Years of Colonial History",food:"World-Class Cafés & Cuisine",relaxation:"Sunset Rampart Walk",heritage:"Best Colonial Fort in Asia",couple:"Most Romantic Town in Lanka",friends:"Boutique & Bar Scene"},
+   tags:["UNESCO","Dutch Colonial","Boutique Scene"]},
+
+  {n:"Temple of the Tooth",gr:"linear-gradient(135deg,#5c3a00,#c47820)",em:"🛕",
+   style:["culture","relaxation"],env:["heritage","urban"],comp:["solo","couple","family","friends"],bud:["budget","midrange","varies"],
+   why:{culture:"Sri Lanka's Most Sacred Site",heritage:"Buddha's Tooth Relic",relaxation:"Evening Puja Ceremony",solo:"Profound Spiritual Experience",family:"Living Cultural History"},
+   tags:["Sacred Relic","Puja Ceremony","Kandyan Heritage"]},
+
+  {n:"Polonnaruwa Ruins",gr:"linear-gradient(135deg,#2e1500,#a05a10)",em:"🗿",
+   style:["culture","adventure"],env:["heritage","countryside"],comp:["solo","couple","family"],bud:["midrange","varies"],
+   why:{culture:"Medieval Kingdom Ruins",heritage:"UNESCO Ancient Capital",adventure:"Bicycle Through Ruins",countryside:"Jungle Archaeological Park",solo:"History Immersion",couple:"Sunrise Bicycle Ride"},
+   tags:["UNESCO","Bicycle Tour","Gal Vihara Rock Sculptures"]},
+
+  {n:"Dambulla Cave Temple",gr:"linear-gradient(135deg,#2e1200,#8a4000)",em:"🕌",
+   style:["culture"],env:["heritage"],comp:["solo","couple","family","friends"],bud:["budget","midrange","varies"],
+   why:{culture:"2,000 Years of Buddhist Art",heritage:"5 Sacred Cave Shrines",solo:"Meditative Experience",family:"Awe-Inspiring History",couple:"Ancient Wonder Together"},
+   tags:["UNESCO","2,100m² of Frescoes","Golden Rock Monastery"]},
+
+  {n:"Anuradhapura Sacred City",gr:"linear-gradient(135deg,#0d2500,#1a6600)",em:"🌳",
+   style:["culture","relaxation"],env:["heritage","countryside"],comp:["solo","couple","family"],bud:["budget","midrange","varies"],
+   why:{culture:"Sri Lanka's Oldest Capital",heritage:"2,300-Year-Old Sacred Tree",relaxation:"Peaceful Ancient Town",countryside:"Open Plains & Stupas",solo:"Deep Historical Immersion"},
+   tags:["Sacred Bo Tree","Giant Stupas","Ancient Capital"]},
+
+  {n:"Jaffna",gr:"linear-gradient(135deg,#1a0a00,#8a3010)",em:"🕍",
+   style:["culture","food"],env:["heritage","urban"],comp:["solo","couple","friends"],bud:["budget","midrange"],
+   why:{culture:"Unique Tamil Heritage",food:"Exceptional Jaffna Cuisine",heritage:"Fort & Hindu Temple Circuit",solo:"Off the Beaten Path",friends:"Cultural Deep-Dive"},
+   tags:["Tamil Culture","Hidden Gem","Authentic Local Life"]},
+
+  {n:"Colombo",gr:"linear-gradient(135deg,#050e20,#1a2a5a)",em:"🌆",
+   style:["food","nightlife","culture"],env:["urban"],comp:["solo","couple","friends"],bud:["midrange","premium","varies"],
+   why:{food:"Sri Lanka's Best Food Scene",nightlife:"Rooftop Bars & Clubs",culture:"Colonial Meets Modern",urban:"Cosmopolitan Capital",friends:"Night Out Hub",solo:"Urban Explorer's Base"},
+   tags:["Rooftop Bars","Street Food","Pettah Market"]},
+
+  {n:"Galle Face Green",gr:"linear-gradient(135deg,#0a1520,#1a4060)",em:"🌅",
+   style:["relaxation","food","nightlife"],env:["urban","beach"],comp:["family","couple","friends","solo"],bud:["budget","midrange","varies"],
+   why:{relaxation:"Breezy Sunset Promenade",food:"Street Food Paradise",nightlife:"Evening Gathering Spot",urban:"Colombo's Heartbeat",family:"Kite-Flying at Sunset",couple:"Romantic Seafront Walk"},
+   tags:["Sunset Promenade","Street Food","Colombo Landmark"]},
+
+  {n:"Yala National Park",gr:"linear-gradient(135deg,#1e1000,#8a4010)",em:"🐆",
+   style:["adventure","relaxation"],env:["remote","countryside"],comp:["couple","family","friends","solo"],bud:["midrange","premium","varies"],
+   why:{adventure:"World's Densest Leopard Safari",relaxation:"Sunrise Jeep Drive",remote:"Wild Untamed Dry Zone",couple:"Unforgettable Wildlife Safari",family:"Amazing for Kids",friends:"Group Safari Experience",solo:"Solitary Wild Encounter"},
+   tags:["Leopard Spotting","Jeep Safari","Iconic Wildlife"]},
+
+  {n:"Minneriya National Park",gr:"linear-gradient(135deg,#0d2010,#2a6a30)",em:"🐘",
+   style:["adventure","culture"],env:["countryside","heritage"],comp:["family","couple","friends","solo"],bud:["midrange","varies"],
+   why:{adventure:"The Greatest Elephant Gathering",culture:"Ancient Irrigation Heritage",countryside:"Open Grassland Safari",family:"Magical Wildlife for Kids",couple:"Unique Shared Memory"},
+   tags:["300+ Wild Elephants","The Gathering","Ancient Tank"]},
+
+  {n:"Sinharaja Rainforest",gr:"linear-gradient(135deg,#041a08,#0d5020)",em:"🌳",
+   style:["adventure","relaxation"],env:["remote","mountains"],comp:["solo","couple","friends"],bud:["midrange","varies"],
+   why:{adventure:"Virgin Rainforest Trek",relaxation:"Ancient Forest Silence",remote:"Last Primary Rainforest",solo:"Rare Birdwatching",couple:"Green Wilderness Escape",friends:"Guided Forest Expedition"},
+   tags:["UNESCO Biosphere","Endemic Species","Pristine Jungle"]},
+
+  {n:"Udawalawe Safari",gr:"linear-gradient(135deg,#2a1200,#905020)",em:"🦏",
+   style:["adventure"],env:["remote","countryside"],comp:["family","couple","solo","friends"],bud:["midrange","premium","varies"],
+   why:{adventure:"Open Plains Wild Safari",remote:"Vast Wilderness Reserve",family:"Best Family Wildlife Park",couple:"Sunrise Safari Memories",solo:"Lone Wildlife Encounter"},
+   tags:["Wild Elephant Herds","Open Plains","Jeep Safari"]},
+
+  {n:"Pinnawala Elephant Orphanage",gr:"linear-gradient(135deg,#102a10,#1a8040)",em:"🐘",
+   style:["culture","relaxation"],env:["countryside"],comp:["family","couple","solo"],bud:["midrange","varies"],
+   why:{culture:"Conservation Story & History",relaxation:"Heartwarming Experience",family:"Kids Absolutely Love It",couple:"Unforgettable Encounter",solo:"Inspiring Visit"},
+   tags:["80+ Rescued Elephants","River Bathing","Baby Feeding"]},
+
+  {n:"Nine Arch Bridge, Ella",gr:"linear-gradient(135deg,#0a2010,#1a7060)",em:"🌉",
+   style:["culture","adventure","relaxation"],env:["mountains","countryside","heritage"],comp:["couple","solo","friends","family"],bud:["budget","midrange","varies"],
+   why:{culture:"Colonial Engineering Marvel",adventure:"Tea Estate Trail Walk",relaxation:"Morning Train Crossing",countryside:"Jungle Viaduct",couple:"Most Romantic Photo Spot",friends:"Iconic Instagram Moment",family:"Watch the Blue Train"},
+   tags:["Iconic Photo Spot","Colonial Viaduct","Tea Estate Walk"]},
+
+  {n:"Nuwara Eliya",gr:"linear-gradient(135deg,#101a30,#3a6088)",em:"🌸",
+   style:["relaxation","culture"],env:["mountains","countryside"],comp:["couple","family","solo"],bud:["midrange","premium","varies"],
+   why:{relaxation:"Cool Climate Hill Station",culture:"British Colonial Charm",mountains:"Tea Plantation Country",countryside:"Strawberry Farms & Lakes",couple:"Most Romantic Hill Town",family:"Unique Climate Change"},
+   tags:["Little England","Tea Estates","Cool Climate"]},
+
+  {n:"Peradeniya Botanical Gardens",gr:"linear-gradient(135deg,#061608,#1a6a40)",em:"🌺",
+   style:["relaxation","culture"],env:["countryside","urban"],comp:["family","couple","solo"],bud:["budget","midrange"],
+   why:{relaxation:"Peaceful Garden Strolls",culture:"Royal Botanical Heritage Since 1821",family:"Picnic Under Giant Fig Tree",couple:"Romantic Morning Walk",solo:"Quiet Green Escape"},
+   tags:["Giant Java Fig Tree","Orchid House","147 Acres"]},
+
+  {n:"Rekawa Turtle Beach",gr:"linear-gradient(135deg,#050e20,#0a3050)",em:"🐢",
+   style:["adventure","relaxation"],env:["beach","remote"],comp:["couple","solo","family"],bud:["budget","midrange"],
+   why:{adventure:"Nesting Turtle Night Watch",relaxation:"Remote Pristine Beach",beach:"Unspoiled South Coast",couple:"Magical Nighttime Experience",family:"Nature Conservation Lesson",solo:"Rare Wildlife Encounter"},
+   tags:["Sea Turtle Nesting","Night Watching","Pristine Coast"]},
+
+  {n:"Madu River Safari",gr:"linear-gradient(135deg,#041510,#0a4030)",em:"🛶",
+   style:["relaxation","adventure","culture"],env:["countryside","remote"],comp:["family","couple","solo","friends"],bud:["budget","midrange","varies"],
+   why:{relaxation:"Tranquil Mangrove Float",adventure:"Boat Safari Through Roots",culture:"Cinnamon Spice Island Visit",family:"Gentle River Adventure",couple:"Peaceful Journey Together",friends:"Relaxed Group Boat Trip"},
+   tags:["Mangrove Labyrinth","Cinnamon Island","Boat Safari"]},
+
+  {n:"Kalpitiya Kite Surfing",gr:"linear-gradient(135deg,#0a1a30,#1a5a90)",em:"🪁",
+   style:["adventure","nightlife"],env:["beach","remote"],comp:["solo","friends","couple"],bud:["midrange","premium"],
+   why:{adventure:"World-Class Kite Surfing Lagoon",nightlife:"Kite Surfing Community Buzz",beach:"Pristine Lagoon",solo:"Extreme Sport Solo Challenge",friends:"Kite & Party",couple:"Learn Together"},
+   tags:["Kite Surfing","Dolphin Safaris","Pristine Lagoon"]},
+
+  {n:"Ritigala Ruins",gr:"linear-gradient(135deg,#0d1a05,#3a5a15)",em:"🏚️",
+   style:["adventure","culture"],env:["remote","heritage","mountains"],comp:["solo","couple","friends"],bud:["budget","midrange"],
+   why:{adventure:"Jungle Ruins Exploration",culture:"2,000-Year-Old Forest Monastery",heritage:"Forgotten Ancient Site",remote:"Hidden Deep Jungle",solo:"Off-the-Beaten-Path Discovery",couple:"Mysterious Together"},
+   tags:["Forgotten Ruins","Jungle Monastery","Hidden Gem"]},
+];
+
+// ══════════════════════════════════════════════════
+//   ANSWER STATE
+// ══════════════════════════════════════════════════
+const A = {style:null, companion:null, environment:[], budget:null};
+
+// Bind choice clicks
+document.querySelectorAll('.choices').forEach(g=>{
+  const isMulti = g.dataset.multi==='true';
+  const max     = parseInt(g.dataset.max||'1');
+  const qk      = g.dataset.q;
+  const si      = parseInt(g.closest('.scr').id.replace('scr-',''));
+  const btn     = document.getElementById('btn'+si);
+
+  g.querySelectorAll('.ch').forEach(c=>{
+    c.addEventListener('click',()=>{
+      const v = c.dataset.v;
+      if(isMulti){
+        if(c.classList.contains('sel')){
+          c.classList.remove('sel'); A[qk]=A[qk].filter(x=>x!==v);
+        } else {
+          if(A[qk].length>=max){
+            const first=g.querySelector('.ch.sel');
+            if(first){first.classList.remove('sel');A[qk]=A[qk].filter(x=>x!==first.dataset.v);}
+          }
+          c.classList.add('sel'); A[qk].push(v);
+        }
+        if(btn) btn.disabled=A[qk].length===0;
+      } else {
+        g.querySelectorAll('.ch').forEach(x=>x.classList.remove('sel'));
+        c.classList.add('sel'); A[qk]=v;
+        if(btn) btn.disabled=false;
+      }
+    });
+  });
+});
+
+// ══════════════════════════════════════════════════
+//   NAVIGATION
+// ══════════════════════════════════════════════════
+let cur=0;
+
+function goNext(from){
+  const fe=document.getElementById('scr-'+from);
+  const te=document.getElementById('scr-'+(from+1));
+  fe.classList.add('out');
+  setTimeout(()=>{fe.classList.remove('on','out');te.classList.add('on');cur=from+1;updProg();},420);
+}
+
+function goPrev(from){
+  const fe=document.getElementById('scr-'+from);
+  const te=document.getElementById('scr-'+(from-1));
+  fe.style.cssText='opacity:0;transform:translateX(55px);transition:opacity .4s,transform .4s cubic-bezier(.4,0,.2,1)';
+  setTimeout(()=>{fe.style.cssText='';fe.classList.remove('on');te.classList.add('on');cur=from-1;updProg();},400);
+}
+
+function updProg(){
+  document.getElementById('progb').style.width=(cur/4*100)+'%';
+  document.querySelectorAll('.dot').forEach(d=>{
+    const i=parseInt(d.dataset.i);
+    d.classList.toggle('on',i===cur);
+    d.classList.toggle('done',i<cur);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//   SUBMIT → save prefs → show discovery
+// ══════════════════════════════════════════════════
+async function doSubmit(){
+  const btn=document.getElementById('btn3');
+  btn.disabled=true;
+  btn.innerHTML='<span style="display:inline-block;animation:spin .7s linear infinite">⏳</span> Building your profile...';
+
+  // Non-blocking API save
+  fetch('api/onboarding.php',{
+    method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({style:A.style,companion:A.companion,environment:A.environment,budget:A.budget})
+  }).catch(()=>{});
+
+  await new Promise(r=>setTimeout(r,850)); // dramatic pause
+  showDiscovery();
+}
+
+function skipAll(){
+  fetch('api/onboarding.php',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({skipped:true})}).catch(()=>{});
+  goLaunch();
+}
+
+// ══════════════════════════════════════════════════
+//   MATCHING ENGINE
+// ══════════════════════════════════════════════════
+function matchPlaces(){
+  return PLACES.map(p=>{
+    let score=0, matchTag=null;
+
+    // Style (biggest signal)
+    if(A.style && p.style.includes(A.style)){
+      score+=5; matchTag=p.why[A.style];
+    }
+    // Environment (2nd signal)
+    A.environment.forEach(e=>{
+      if(p.env.includes(e)){score+=3; if(!matchTag) matchTag=p.why[e];}
+    });
+    // Companion (3rd)
+    if(A.companion && p.comp.includes(A.companion)){
+      score+=2; if(!matchTag) matchTag=p.why[A.companion];
+    }
+    // Budget (tie-breaker)
+    if(A.budget && p.bud.includes(A.budget)) score+=1;
+
+    // Tiny random so same score = shuffled
+    score+=Math.random()*0.5;
+    if(!matchTag) matchTag=p.tags[0];
+
+    return{...p,score,matchTag};
+  }).sort((a,b)=>b.score-a.score);
+}
+
+function badgeCSS(score){
+  if(score>=8)  return 'background:rgba(201,168,76,.88);color:#080F18';
+  if(score>=6)  return 'background:rgba(37,176,158,.82);color:#fff';
+  if(score>=4)  return 'background:rgba(120,170,255,.75);color:#fff';
+  return 'background:rgba(255,255,255,.22);color:#fff';
+}
+
+// ══════════════════════════════════════════════════
+//   BUILD DISCOVERY SCREEN
+// ══════════════════════════════════════════════════
+function showDiscovery(){
+  // Fade out question stage
+  const stage=document.getElementById('stage');
+  const dotrow=document.getElementById('dotrow');
+  stage.style.transition='opacity .5s';
+  stage.style.opacity='0';
+  dotrow.style.transition='opacity .4s';
+  dotrow.style.opacity='0';
+  document.getElementById('progb').style.width='100%';
+
+  setTimeout(()=>{
+    stage.style.display='none';
+    dotrow.style.display='none';
+
+    // Score & pick top 12
+    const top = matchPlaces().slice(0,12);
+
+    // Profile badge row
+    const SLABELS={adventure:'🏔️ Adventure Seeker',relaxation:'🧘 Relaxation & Wellness',culture:'🏛️ Culture Explorer',food:'🍜 Foodie',nightlife:'🎉 Social & Nightlife'};
+    const CLABELS={solo:'🧳 Solo Traveler',couple:'💑 Couple',family:'👨‍👩‍👧 Family',friends:'🧑‍🤝‍🧑 With Friends'};
+    const ELABELS={beach:'🏖️ Beach & Coast',mountains:'🌿 Mountains',urban:'🏙️ Urban',countryside:'🌾 Countryside',heritage:'🕌 Heritage',remote:'🏜️ Remote & Wild'};
+    const BLABELS={budget:'🎒 Budget Traveler',midrange:'⚖️ Mid-Range',premium:'✨ Premium',varies:'🔄 Flexible Budget'};
+
+    const prow=document.getElementById('prow');
+    if(A.style)     prow.innerHTML+=`<div class="pb style">${SLABELS[A.style]||A.style}</div>`;
+    if(A.companion) prow.innerHTML+=`<div class="pb comp">${CLABELS[A.companion]||A.companion}</div>`;
+    A.environment.forEach(e=>prow.innerHTML+=`<div class="pb env">${ELABELS[e]||e}</div>`);
+    if(A.budget)    prow.innerHTML+=`<div class="pb bud">${BLABELS[A.budget]||A.budget}</div>`;
+
+    // Dynamic headline
+    const headlines={
+      adventure:'Your Sri Lankan adventure starts here.',
+      relaxation:'Your perfect Sri Lankan escape awaits.',
+      culture:'Rich history. Deep culture. All yours.',
+      food:'Sri Lanka through flavour & local life.',
+      nightlife:'Vibrant, social Sri Lanka — curated for you.',
+    };
+    document.getElementById('disc-title').textContent = headlines[A.style]||'We found your perfect destinations.';
+    document.getElementById('disc-count').textContent = `${top.length} destinations matched to your travel profile`;
+
+    // Build place grid HTML
+    const grid=document.getElementById('pgrid');
+    grid.innerHTML=top.map((p,i)=>`
+      <div class="pc" id="pc${i}">
+        <div class="pc-bg" style="background:${p.gr}"></div>
+        <div class="pc-ov"></div>
+        <div class="pc-badge-wrap">
+          <div class="pc-badge" style="${badgeCSS(p.score)}">${p.matchTag}</div>
+        </div>
+        <div class="pc-content">
+          <div class="pc-em">${p.em}</div>
+          <div class="pc-name">${p.n}</div>
+          <div class="pc-tags">${p.tags.slice(0,2).join(' · ')}</div>
+        </div>
+      </div>
+    `).join('');
+
+    // Show screen
+    document.getElementById('disc').classList.add('on');
+
+    // Stagger animate cards in
+    top.forEach((_,i)=>setTimeout(()=>{
+      const el=document.getElementById('pc'+i);
+      if(el) el.classList.add('vis');
+    }, 480+i*65));
+
+  },480);
+}
+
+// ══════════════════════════════════════════════════
+//   LAUNCH
+// ══════════════════════════════════════════════════
+function goLaunch(){
+  document.body.style.transition='opacity .5s';
+  document.body.style.opacity='0';
+  setTimeout(()=>window.location.href='xtrack.html',500);
+}
+
+// ══════════════════════════════════════════════════
+//   VISUAL FX
+// ══════════════════════════════════════════════════
+// Particles
+(()=>{
+  const c=document.getElementById('ptcl');
+  const cols=['rgba(201,168,76,','rgba(37,176,158,','rgba(255,255,255,'];
+  for(let i=0;i<32;i++){
+    const el=document.createElement('div'); el.className='p';
+    const s=Math.random()*4+1.5, col=cols[Math.floor(Math.random()*3)];
+    el.style.cssText=`left:${Math.random()*100}%;bottom:-20px;width:${s}px;height:${s}px;background:${col}${(Math.random()*.4+.12).toFixed(2)});animation-duration:${(Math.random()*12+9).toFixed(1)}s;animation-delay:${(Math.random()*9).toFixed(1)}s`;
+    c.appendChild(el);
+  }
+})();
+
+// Canvas grid
+(()=>{
+  const cv=document.getElementById('bgc'), ctx=cv.getContext('2d');
+  function draw(){
+    cv.width=window.innerWidth; cv.height=window.innerHeight;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle='rgba(255,255,255,0.022)'; ctx.lineWidth=1;
+    for(let x=0;x<cv.width;x+=58){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}
+    for(let y=0;y<cv.height;y+=58){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}
+    ctx.strokeStyle='rgba(201,168,76,0.034)';
+    for(let i=-cv.height;i<cv.width;i+=115){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+cv.height,cv.height);ctx.stroke()}
+  }
+  window.addEventListener('resize',draw); draw();
+})();
+
+updProg();
+</script>
+</body>
+</html>

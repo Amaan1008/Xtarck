@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xtrack — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --teal: #2aab99;
+  --teal-dk: #1d8a7c;
+  --teal-lt: #e8f7f5;
+  --bg: #f0f2ec;
+  --surface: #ffffff;
+  --surface2: #f7f8f4;
+  --border: #e3e6df;
+  --text1: #1a1f18;
+  --text2: #4a5248;
+  --text3: #8c9489;
+  --amber: #dc7c32;
+  --amber-lt: #fef4eb;
+  --red: #d94f4f;
+  --green: #27ae7a;
+  --shadow: 0 1px 4px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04);
+  --shadow2: 0 4px 20px rgba(0,0,0,.1);
+  --r: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text1); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOP NAVBAR ── */
+.topnav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 62px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  position: sticky; top: 0; z-index: 100;
+  gap: 0;
+}
+.topnav-brand {
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.topnav-logo-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px; font-weight: 800;
+  letter-spacing: -.4px;
+  color: var(--text1);
+}
+.topnav-logo-text span { color: var(--teal); }
+
+.topnav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 32px;
+  flex: 1;
+}
+.topnav-tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all .18s;
+  border: none; background: none;
+  font-family: 'Montserrat', sans-serif;
+  white-space: nowrap;
+}
+.topnav-tab:hover { background: var(--surface2); color: var(--text2); }
+.topnav-tab.active { background: var(--teal-lt); color: var(--teal-dk); font-weight: 600; }
+.tab-badge { background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+
+.topnav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.topnav-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), #6ab4cc);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+  cursor: pointer;
+}
+.topnav-logout {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .18s;
+}
+.topnav-logout:hover { background: #fdeaea; border-color: #f5c5c5; }
+
+/* ── PAGE ── */
+.page { max-width: 1160px; margin: 0 auto; padding: 28px 24px; }
+
+.panel { display: none; }
+.panel.active { display: block; animation: fadeUp .28s ease both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── WELCOME BANNER ── */
+.welcome-banner {
+  background: linear-gradient(130deg, #1e4035 0%, #1a3a2c 45%, #2d6e50 100%);
+  border-radius: 18px;
+  padding: 36px 40px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: relative; overflow: hidden;
+}
+.welcome-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.04) 1px, transparent 0);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+.welcome-banner::after {
+  content: '';
+  position: absolute; top: -80px; right: -60px;
+  width: 320px; height: 320px;
+  background: radial-gradient(ellipse, rgba(42,171,153,.22) 0%, transparent 65%);
+  pointer-events: none;
+}
+.welcome-left { position: relative; z-index: 1; }
+.welcome-greeting { font-size: 16px; color: rgba(255,255,255,.8); font-weight: 500; margin-bottom: 6px; }
+.welcome-emoji { font-size: 26px; display: block; margin-bottom: 10px; }
+.welcome-desc { font-size: 14px; color: rgba(255,255,255,.55); max-width: 380px; line-height: 1.65; }
+.welcome-cta { position: relative; z-index: 1; flex-shrink: 0; }
+.btn-start {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 28px;
+  background: var(--amber);
+  color: #fff;
+  border-radius: 40px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px; font-weight: 700;
+  text-decoration: none;
+  border: none; cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 4px 18px rgba(220,124,50,.35);
+}
+.btn-start:hover { background: #c96c22; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(220,124,50,.45); }
+
+/* ── STAT GRID ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 16px;
+  transition: box-shadow .2s, transform .2s;
+}
+.stat-card:hover { box-shadow: var(--shadow2); transform: translateY(-2px); }
+.stat-icon-wrap { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-value { font-family: 'Inter', sans-serif; font-size: 28px; line-height: 1; color: var(--text1); font-weight: 800; letter-spacing: -0.5px; }
+.stat-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-top: 3px; }
+
+/* ── BODY GRID ── */
+.body-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; margin-bottom: 24px; }
+
+/* ── CARD ── */
+.card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+.card-header { padding: 20px 22px 0; display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text1); }
+.card-subtitle { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.card-action { font-size: 12px; color: var(--teal); font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: background .15s; flex-shrink: 0; text-decoration: none; display: inline-flex; align-items: center; }
+.card-action:hover { background: var(--teal-lt); }
+.card-body { padding: 0 22px 20px; }
+
+/* ── REC CARDS ── */
+.rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rec-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.rec-card:hover { box-shadow: var(--shadow2); background: var(--surface); transform: translateY(-2px); }
+.rec-icon-wrap { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.rec-card-name { font-size: 12px; font-weight: 700; color: var(--text1); margin-bottom: 5px; }
+.rec-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rec-tag-pill { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.tag-hiking { background: #e8f7f5; color: var(--teal-dk); }
+.tag-beach { background: #e8f2fa; color: #3a86c8; }
+.tag-camping { background: #fef4eb; color: var(--amber); }
+.tag-road-trip { background: #f5edf9; color: #9b59b6; }
+.rec-rating { font-size: 11px; color: var(--text2); font-weight: 500; }
+.rec-duration { font-size: 11px; color: var(--text3); }
+
+/* ── PROFILE SIDEBAR CARD ── */
+.profile-side-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 22px; }
+.profile-side-title { font-size: 15px; font-weight: 700; color: var(--text1); margin-bottom: 18px; }
+.profile-side-avatar-wrap { display: flex; justify-content: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.profile-side-avatar {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: linear-gradient(135deg, #c8e6e0, #a8d4ce);
+  border: 4px solid #deeeed;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; color: var(--teal-dk);
+}
+.profile-info-row {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 13px 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 10px;
+}
+.profile-info-icon { color: var(--text3); flex-shrink: 0; margin-top: 1px; }
+.profile-info-label { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 2px; }
+.profile-info-value { font-size: 13px; font-weight: 600; color: var(--text1); }
+
+/* ── PREVIOUS PLANS ── */
+.section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-size: 17px; font-weight: 700; color: var(--text1); }
+.section-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.plans-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.plan-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  transition: all .2s;
+  cursor: pointer;
+}
+.plan-card:hover { box-shadow: var(--shadow2); transform: translateY(-2px); }
+.plan-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.plan-card-name { font-size: 14px; font-weight: 700; color: var(--text1); line-height: 1.3; }
+.plan-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.status-completed { background: #edf7f3; color: #1a7a50; }
+.status-draft { background: var(--amber-lt); color: var(--amber); }
+.plan-meta-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+
+/* ── FULL-PAGE RECS ── */
+.recs-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-btn { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-family: 'Montserrat', sans-serif; transition: all .15s; }
+.filter-btn.active, .filter-btn:hover { background: var(--teal); border-color: var(--teal); color: #fff; }
+.rec-full-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+.rec-full-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+.rec-full-card:hover { transform: translateY(-4px); box-shadow: var(--shadow2); }
+.rec-full-img { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 52px; position: relative; }
+.rec-full-img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.4)); }
+.rec-full-cats { position: absolute; top: 10px; left: 10px; display: flex; gap: 5px; }
+.rec-full-body { padding: 16px; }
+.rec-full-name { font-size: 15px; font-weight: 600; color: var(--text1); margin-bottom: 3px; }
+.rec-full-loc { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.rec-full-desc { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+.rec-full-footer { display: flex; align-items: center; justify-content: space-between; }
+.rec-full-rating { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+.rec-full-rating strong { color: var(--text1); }
+.rec-full-match { font-size: 11px; font-weight: 600; color: var(--teal-dk); background: var(--teal-lt); padding: 3px 9px; border-radius: 5px; }
+
+/* ── TRIPS PANEL ── */
+.trips-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.trips-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; }
+.trip-full-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; transition: box-shadow .2s; }
+.trip-full-card:hover { box-shadow: var(--shadow2); }
+.trip-full-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.trip-full-ico { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.trip-full-title { font-size: 15px; font-weight: 600; color: var(--text1); margin-bottom: 4px; }
+.trip-full-meta { font-size: 12px; color: var(--text3); }
+.trip-full-places { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.place-pill { font-size: 11px; color: var(--text2); background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; }
+.place-pill-more { color: var(--teal); font-weight: 600; }
+.trip-full-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+.trip-full-budget { font-size: 13px; color: var(--text2); }
+.trip-full-budget strong { color: var(--text1); font-weight: 600; }
+.trip-panel-tag { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; letter-spacing: .5px; }
+.tag-budget { background: var(--amber-lt); color: var(--amber); }
+.tag-dest { background: var(--teal-lt); color: var(--teal-dk); }
+
+/* ── REVIEWS ── */
+.review-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.review-item:last-child { border-bottom: none; }
+.review-place { font-size: 13px; font-weight: 600; color: var(--text1); margin-bottom: 3px; }
+.review-stars { display: flex; gap: 2px; margin-bottom: 5px; }
+.review-tip { font-size: 12px; color: var(--text2); line-height: 1.5; font-style: italic; }
+.review-date { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── PROFILE PANEL ── */
+.profile-page-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+.profile-avatar-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 32px 24px; text-align: center; }
+.profile-big-av { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg,var(--teal),#6ab4cc); display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 500; color: #fff; margin: 0 auto 16px; }
+.profile-fullname { font-family: 'Cormorant Garamond',serif; font-size: 20px; color: var(--text1); margin-bottom: 4px; }
+.profile-email { font-size: 13px; color: var(--text3); margin-bottom: 16px; }
+.profile-member-lbl { font-size: 12px; color: var(--text3); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+.badge-teal { background: var(--teal-lt); color: var(--teal-dk); }
+.badge-green { background: #edf7f3; color: #1a7a50; }
+.profile-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 20px; }
+.pstat { background: var(--surface2); border-radius: 9px; padding: 14px 12px; text-align: center; }
+.pstat-num { font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 800; color: var(--text1); letter-spacing: -0.5px; }
+.pstat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; display: block; }
+.form-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 14px; font-family: 'Montserrat',sans-serif; font-size: 14px; color: var(--text1); outline: none; transition: border-color .2s, box-shadow .2s; }
+.form-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(42,171,153,.1); }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 8px; font-family: 'Montserrat',sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .18s; text-decoration: none; }
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal-dk); }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); }
+
+/* ── CHART ── */
+.chart-wrap { padding: 0 22px 22px; height: 200px; position: relative; }
+
+/* ── MOBILE ── */
+.mob-tabs { display: none; overflow-x: auto; gap: 6px; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); scrollbar-width: none; }
+.mob-tabs::-webkit-scrollbar { display: none; }
+.mob-tab { flex-shrink: 0; padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text3); cursor: pointer; border: 1px solid var(--border); background: var(--surface); font-family: 'Montserrat', sans-serif; transition: all .15s; }
+.mob-tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+@media (max-width: 960px) {
+  .topnav-tabs { display: none; }
+  .mob-tabs { display: flex; }
+  .body-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .plans-grid { grid-template-columns: repeat(2,1fr); }
+  .rec-full-grid { grid-template-columns: repeat(2,1fr); }
+  .trips-grid { grid-template-columns: 1fr; }
+  .profile-page-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 540px) {
+  .plans-grid { grid-template-columns: 1fr; }
+  .rec-full-grid { grid-template-columns: 1fr; }
+  .welcome-banner { flex-direction: column; align-items: flex-start; padding: 24px 22px; }
+  .page { padding: 16px 14px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Admin Announcement Banners ── */
+#ann-banners { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.ann-banner {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:13px 16px; border-radius:10px;
+  border-left:4px solid transparent;
+  font-size:13px; line-height:1.5;
+  animation: fadeSlideIn .3s ease both;
+}
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.ann-banner.info    { background:#eff6ff; border-color:#3b82f6; }
+.ann-banner.warning { background:#fef4eb; border-color:var(--amber); }
+.ann-banner.success { background:#e8f7ef; border-color:var(--green); }
+.ann-banner-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+.ann-banner-body { flex:1; }
+.ann-banner-title { font-weight:700; color:var(--text1); margin-bottom:2px; }
+.ann-banner-msg   { color:var(--text2); }
+.ann-banner-close {
+  background:none; border:none; cursor:pointer;
+  color:var(--text3); font-size:16px; line-height:1;
+  padding:0 2px; flex-shrink:0; transition:color .15s;
+}
+.ann-banner-close:hover { color:var(--text1); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAVBAR -->
+<nav class="topnav">
+  <a class="topnav-brand" href="dashboard.html">
+    <img src="assets/logo.png" alt="Xtrack" style="height:32px;width:auto;display:block">
+  </a>
+
+  <div class="topnav-tabs">
+    <button class="topnav-tab active" data-panel="dashboard" onclick="showPanel('dashboard',this)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="1" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="8" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="8" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.3"/></svg>
+      Dashboard
+    </button>
+    <button class="topnav-tab" data-panel="trips" onclick="showPanel('trips',this)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M2 7h7M2 10.5h4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11.5" cy="10" r="1.8" stroke="currentColor" stroke-width="1.3"/></svg>
+      My Trips
+      <span class="tab-badge" id="nav-trips-count">0</span>
+    </button>
+    <button class="topnav-tab" data-panel="recommendations" onclick="showPanel('recommendations',this)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L8.5 5L12.5 5.5L9.5 8.5L10.5 12L7 10.2L3.5 12L4.5 8.5L1.5 5.5L5.5 5L7 1.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      Recommendations
+    </button>
+    <button class="topnav-tab" data-panel="reviews" onclick="showPanel('reviews',this)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 1.5h9a1 1 0 011 1v6a1 1 0 01-1 1H8l-2.5 2.5v-2.5H2.5a1 1 0 01-1-1v-6a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/></svg>
+      My Reviews
+    </button>
+    <button class="topnav-tab" data-panel="premium" onclick="showPanel('premium',this)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.3l-3.2 1.6.6-3.6L1.8 4.8l3.6-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      Premium
+    </button>
+    <button class="topnav-tab" data-panel="profile" onclick="showPanel('profile',this)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 12c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Profile
+    </button>
+  </div>
+
+  <div class="topnav-right">
+    <div class="topnav-avatar" id="nav-avatar" onclick="showPanel('profile', document.querySelector('[data-panel=profile]'))">?</div>
+    <div class="topnav-logout" onclick="doLogout()" title="Sign out">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l3-3-3-3M13 8H6" stroke="#d94f4f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE TABS -->
+<div class="mob-tabs">
+  <button class="mob-tab active" data-panel="dashboard" onclick="showPanel('dashboard',this)">Dashboard</button>
+  <button class="mob-tab" data-panel="trips" onclick="showPanel('trips',this)">My Trips</button>
+  <button class="mob-tab" data-panel="recommendations" onclick="showPanel('recommendations',this)">Recommendations</button>
+  <button class="mob-tab" data-panel="reviews" onclick="showPanel('reviews',this)">Reviews</button>
+  <button class="mob-tab" data-panel="premium" onclick="showPanel('premium',this)">Premium</button>
+  <button class="mob-tab" data-panel="profile" onclick="showPanel('profile',this)">Profile</button>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════ DASHBOARD PANEL ═══ -->
+  <div class="panel active" id="panel-dashboard">
+
+    <!-- Admin Announcements (loaded dynamically) -->
+    <div id="ann-banners"></div>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div class="welcome-left">
+        <div class="welcome-greeting" id="welcome-greeting">Good Morning</div>
+        <span class="welcome-emoji">👋</span>
+        <div class="welcome-desc">Ready for your next Sri Lanka adventure? Let's plan something unforgettable.</div>
+      </div>
+      <div class="welcome-cta">
+        <a href="xtrack.html" class="btn-start">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L14.5 8 8 14.5M1.5 8h13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Start Your Plan
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:#eaf5f3">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6h16M3 11h12M3 16h7" stroke="#2aab99" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="15" r="3" stroke="#2aab99" stroke-width="1.8"/></svg>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-trips">0</div>
+          <div class="stat-label">Trips Planned</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:#fef1e6">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2C7 2 4 5 4 9c0 5.5 7 11 7 11s7-5.5 7-11c0-4-3-7-7-7z" stroke="#dc7c32" stroke-width="1.8"/><circle cx="11" cy="9" r="2.5" stroke="#dc7c32" stroke-width="1.8"/></svg>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-places">0</div>
+          <div class="stat-label">Places Visited</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:#e8f2fa">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="15" rx="2" stroke="#3a86c8" stroke-width="1.8"/><path d="M7 2v4M15 2v4M3 9h16" stroke="#3a86c8" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-days">0</div>
+          <div class="stat-label">Days Traveled</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap" style="background:#f5edf9">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L13.3 7.5L19.5 8L15 12L16.5 18L11 15L5.5 18L7 12L2.5 8L8.7 7.5L11 2Z" stroke="#9b59b6" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-saved">0</div>
+          <div class="stat-label">Saved Plans</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommended + Profile -->
+    <div class="body-grid">
+
+      <!-- Recommended For You -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Recommended For You</div>
+            <div class="card-subtitle">Handpicked adventures based on your interests</div>
+          </div>
+          <span class="card-action" onclick="showPanel('recommendations', document.querySelector('[data-panel=recommendations]'))">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M8 4l3 3-3 3" stroke="var(--teal)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="rec-grid">
+            <div class="rec-card" onclick="showPanel('recommendations', document.querySelector('[data-panel=recommendations]'))">
+              <div class="rec-icon-wrap" style="background:#eaf5f3">🏔️</div>
+              <div>
+                <div class="rec-card-name">Ella Rock Sunrise Hike</div>
+                <div class="rec-card-meta">
+                  <span class="rec-tag-pill tag-hiking">Hiking</span>
+                  <span class="rec-rating">★ 4.8</span>
+                  <span class="rec-duration">⏱ 2 days</span>
+                </div>
+              </div>
+            </div>
+            <div class="rec-card" onclick="showPanel('recommendations', document.querySelector('[data-panel=recommendations]'))">
+              <div class="rec-icon-wrap" style="background:#e8f2fa">☀️</div>
+              <div>
+                <div class="rec-card-name">Mirissa Beach Escape</div>
+                <div class="rec-card-meta">
+                  <span class="rec-tag-pill tag-beach">Beach</span>
+                  <span class="rec-rating">★ 4.9</span>
+                  <span class="rec-duration">⏱ 3 days</span>
+                </div>
+              </div>
+            </div>
+            <div class="rec-card" onclick="showPanel('recommendations', document.querySelector('[data-panel=recommendations]'))">
+              <div class="rec-icon-wrap" style="background:#fef1e6">⛺</div>
+              <div>
+                <div class="rec-card-name">Knuckles Range Camping</div>
+                <div class="rec-card-meta">
+                  <span class="rec-tag-pill tag-camping">Camping</span>
+                  <span class="rec-rating">★ 4.7</span>
+                  <span class="rec-duration">⏱ 2 days</span>
+                </div>
+              </div>
+            </div>
+            <div class="rec-card" onclick="showPanel('recommendations', document.querySelector('[data-panel=recommendations]'))">
+              <div class="rec-icon-wrap" style="background:#f5edf9">🚗</div>
+              <div>
+                <div class="rec-card-name">Colombo to Kandy Road Trip</div>
+                <div class="rec-card-meta">
+                  <span class="rec-tag-pill tag-road-trip">Road Trip</span>
+                  <span class="rec-rating">★ 4.6</span>
+                  <span class="rec-duration">⏱ 1 day</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Your Profile -->
+      <div class="profile-side-card">
+        <div class="profile-side-title">Your Profile</div>
+        <div class="profile-side-avatar-wrap">
+          <div class="profile-side-avatar" id="dash-avatar">?</div>
+        </div>
+        <div class="profile-info-row">
+          <svg class="profile-info-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="3" stroke="var(--text3)" stroke-width="1.3"/><path d="M1.5 13c0-3 2.7-5 6-5s6 2 6 5" stroke="var(--text3)" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <div>
+            <div class="profile-info-label">Member Since</div>
+            <div class="profile-info-value" id="dash-member-since">N/A</div>
+          </div>
+        </div>
+        <div class="profile-info-row">
+          <svg class="profile-info-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5L9.3 5.5L13.5 6L10.5 9L11.5 13.5L7.5 11.5L3.5 13.5L4.5 9L1.5 6L5.7 5.5L7.5 1.5Z" stroke="var(--text3)" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <div>
+            <div class="profile-info-label">Travel Style</div>
+            <div class="profile-info-value">Adventurous Explorer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Previous Plans -->
+    <div>
+      <div class="section-header">
+        <div>
+          <div class="section-title">Previous Plans</div>
+          <div class="section-sub">Your travel history at a glance</div>
+        </div>
+        <span class="card-action" onclick="showPanel('trips', document.querySelector('[data-panel=trips]'))">View all →</span>
+      </div>
+      <div class="plans-grid" id="prev-plans-grid"><!-- JS --></div>
+    </div>
+
+  </div><!-- /panel-dashboard -->
+
+
+  <!-- ══════════════════════════════════ TRIPS PANEL ═══ -->
+  <div class="panel" id="panel-trips">
+    <div class="trips-page-header">
+      <div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text1);margin-bottom:4px">My Trips</h2>
+        <p style="font-size:14px;color:var(--text3)" id="trips-subtitle">0 saved planning sessions</p>
+      </div>
+      <a href="xtrack.html" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+        New Trip
+      </a>
+    </div>
+    <div class="trips-grid" id="trips-grid"><!-- JS --></div>
+  </div>
+
+
+  <!-- ══════════════════════════════════ RECOMMENDATIONS PANEL ═══ -->
+  <div class="panel" id="panel-recommendations">
+    <div class="recs-header">
+      <div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text1);margin-bottom:4px">Places For You</h2>
+        <p style="font-size:14px;color:var(--text3)">Curated picks based on your Beach & Hiking travel style</p>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterRecs(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterRecs(this,'beach')">Beach</button>
+        <button class="filter-btn" onclick="filterRecs(this,'hiking')">Hiking</button>
+        <button class="filter-btn" onclick="filterRecs(this,'culture')">Culture</button>
+        <button class="filter-btn" onclick="filterRecs(this,'wildlife')">Wildlife</button>
+      </div>
+    </div>
+    <div class="rec-full-grid" id="rec-full-grid"><!-- JS --></div>
+  </div>
+
+
+  <!-- ══════════════════════════════════ REVIEWS PANEL ═══ -->
+  <div class="panel" id="panel-reviews">
+    <div style="margin-bottom:20px">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text1);margin-bottom:4px">My Reviews</h2>
+      <p style="font-size:14px;color:var(--text3)">Places you've visited and reviewed</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Review History</div></div>
+        <div class="card-body" id="reviews-list"><!-- JS --></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Rating Breakdown</div></div>
+        <div class="chart-wrap"><canvas id="reviewChart"></canvas></div>
+        <div style="padding:0 22px 22px">
+          <div style="background:var(--teal-lt);border-radius:9px;padding:14px 16px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Average Rating</div>
+            <div id="avg-rating-display" style="font-family:'Inter',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px;color:var(--teal-dk)">— <span style="font-size:15px;font-family:'Montserrat',sans-serif;color:var(--teal)">/ 5.0</span></div>
+            <div id="avg-rating-label" style="font-size:11px;color:var(--text3);margin-top:3px">No reviews yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════ PROFILE PANEL ═══ -->
+  <div class="panel" id="panel-profile">
+    <div style="margin-bottom:20px">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text1);margin-bottom:4px">Profile Settings</h2>
+      <p style="font-size:14px;color:var(--text3)">Manage your account and travel preferences</p>
+    </div>
+    <div class="profile-page-grid">
+      <div>
+        <div class="profile-avatar-card">
+          <div class="profile-big-av" id="profile-avatar">?</div>
+          <div class="profile-fullname" id="profile-fullname">—</div>
+          <div class="profile-email" id="profile-email">—</div>
+          <div class="filter-row" style="justify-content:center">
+            <span class="badge badge-teal">Beach Lover</span>
+            <span class="badge badge-green">Hiker</span>
+          </div>
+          <div class="profile-member-lbl" id="profile-member">Member since —</div>
+          <div class="profile-stats-row">
+            <div class="pstat"><div class="pstat-num" id="pstat-trips">0</div><div class="pstat-lbl">Trips</div></div>
+            <div class="pstat"><div class="pstat-num" id="pstat-places">0</div><div class="pstat-lbl">Places</div></div>
+            <div class="pstat"><div class="pstat-num" id="pstat-reviews">0</div><div class="pstat-lbl">Reviews</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><div class="card-title">Edit Profile</div></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input class="form-input" id="form-fullname" type="text" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input class="form-input" id="form-email" type="email" placeholder="your@email.com">
+            </div>
+            <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Travel Preferences</div></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text3);margin-bottom:12px">Select interests to get better recommendations</p>
+            <div class="filter-row" id="pref-filters">
+              <button class="filter-btn active">Beach</button>
+              <button class="filter-btn active">Hiking</button>
+              <button class="filter-btn">Culture</button>
+              <button class="filter-btn">Wildlife</button>
+              <button class="filter-btn">Road Trip</button>
+              <button class="filter-btn">Camping</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREMIUM PANEL -->
+  <div class="panel" id="panel-premium">
+
+    <div id="prem-active-banner" style="display:none;margin-bottom:24px;background:linear-gradient(135deg,#12201a,#1d8a7c);border-radius:14px;padding:22px 28px;color:#fff;align-items:center;gap:18px;box-shadow:0 4px 20px rgba(42,171,153,.3)">
+      <div style="font-size:36px">&#11088;</div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:700;margin-bottom:3px">You are an XTrack Premium Member!</div>
+        <div style="font-size:13px;opacity:.8" id="prem-banner-detail">-</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;opacity:.55;margin-bottom:2px">ACTIVE PLAN</div>
+        <div style="font-size:15px;font-weight:700" id="prem-banner-plan">-</div>
+      </div>
+    </div>
+
+    <div id="prem-intro" style="margin-bottom:28px">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--text1);margin-bottom:6px">Upgrade to XTrack Premium</h2>
+      <p style="font-size:14px;color:var(--text3);max-width:520px">Unlock AI planning, unlimited saves, offline access and much more. Choose the plan that fits your travel style.</p>
+    </div>
+
+    <div id="prem-plans-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:32px">
+      <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text3);font-size:13px">Loading plans...</div>
+    </div>
+
+    <!-- Payment modal overlay -->
+    <div id="prem-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--surface);border-radius:18px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden">
+        <div style="background:linear-gradient(135deg,#12201a,#1d3028);padding:22px 26px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px">Secure Payment</div>
+            <div style="font-size:17px;font-weight:700;color:#fff" id="prem-modal-plan-name">Explorer Plan</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:22px;font-weight:800;color:var(--teal)" id="prem-modal-price">LKR 990</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4)" id="prem-modal-period">per month</div>
+          </div>
+        </div>
+        <div id="prem-success-screen" style="display:none;padding:40px 28px;text-align:center">
+          <div style="font-size:56px;margin-bottom:16px">&#127881;</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text1);margin-bottom:8px">Payment Successful!</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:14px" id="prem-success-detail">Welcome to XTrack Premium.</div>
+          <div style="font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:0 0 18px;text-align:left;line-height:1.8" id="prem-success-receipt"></div>
+          <button onclick="closePremModal(true)" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),var(--teal-dk));color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Go to Dashboard</button>
+        </div>
+        <div id="prem-payment-form" style="padding:24px 26px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:16px">Card Details</div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px">Card Number</label>
+            <div style="position:relative">
+              <input id="prem-card-num" type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" oninput="fmtCard(this)"
+                style="width:100%;padding:11px 46px 11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;color:var(--text1);background:var(--surface2);outline:none;transition:border-color .18s"
+                onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+              <div id="prem-card-brand-icon" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:20px;pointer-events:none">&#128179;</div>
+            </div>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px">Cardholder Name</label>
+            <input id="prem-card-name" type="text" placeholder="As printed on card"
+              style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;color:var(--text1);background:var(--surface2);outline:none;transition:border-color .18s"
+              onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px">Expiry (MM/YY)</label>
+              <input id="prem-card-exp" type="text" inputmode="numeric" maxlength="5" placeholder="MM/YY" oninput="fmtExpiry(this)"
+                style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;color:var(--text1);background:var(--surface2);outline:none;transition:border-color .18s"
+                onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px">CVV</label>
+              <input id="prem-card-cvv" type="password" inputmode="numeric" maxlength="4" placeholder="..."
+                style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;color:var(--text1);background:var(--surface2);outline:none;transition:border-color .18s"
+                onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+          </div>
+          <div id="prem-pay-err" style="display:none;padding:10px 14px;background:var(--amber-lt);border:1px solid var(--amber);border-radius:8px;font-size:12px;color:#8a4a10;margin-bottom:14px"></div>
+          <button id="prem-pay-btn" onclick="submitPremPayment()"
+            style="width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),var(--teal-dk));color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px">
+            Pay &amp; Activate Premium
+          </button>
+          <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">&#128274; 256-bit SSL encrypted</div>
+          <button onclick="closePremModal(false)" style="margin-top:10px;width:100%;padding:10px;background:none;border:1.5px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:8px">
+      <div class="card" style="padding:18px 20px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">&#128274;</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">Secure Payment</div>
+        <div style="font-size:11px;color:var(--text3)">All transactions are encrypted end-to-end</div>
+      </div>
+      <div class="card" style="padding:18px 20px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">&#8617;&#65039;</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">7-Day Refund</div>
+        <div style="font-size:11px;color:var(--text3)">Not happy? Contact us within 7 days</div>
+      </div>
+      <div class="card" style="padding:18px 20px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">&#9889;</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">Instant Activation</div>
+        <div style="font-size:11px;color:var(--text3)">Access unlocked the moment payment clears</div>
+      </div>
+      <div class="card" style="padding:18px 20px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">&#127911;</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">Priority Support</div>
+        <div style="font-size:11px;color:var(--text3)">Dedicated help for all premium members</div>
+      </div>
+    </div>
+
+  </div><!-- /panel-premium -->
+
+</div><!-- /page -->
+
+<script src="js/shared/dom.js"></script>
+<script src="js/shared/globals.js"></script>
+<script src="js/pages/dashboard.js"></script>
+</body>
+</html>

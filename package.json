@@ -1,0 +1,12 @@
+{
+  "name": "xtrack-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Xtrack frontend — TypeScript source, compiled to plain <script> JS. Backend stays PHP/MySQL (api/, config/).",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
